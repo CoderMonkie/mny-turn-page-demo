@@ -1,0 +1,37 @@
+
+.uni-link[data-v-6c93f7f9] {
+		cursor: pointer;
+}
+.uni-link--withline[data-v-6c93f7f9] {
+		text-decoration: underline;
+}
+
+/* 水平间距 */
+/* 水平间距 */
+.uni-turn-page[data-v-a5c21794] {
+  transform: skewX(-5deg);
+}
+.uni-turn-page .image-container[data-v-a5c21794] {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+/* 水平间距 */
+/* 水平间距 */
+.mny-turn-page__demo .image-container[data-v-57280228] {
+  position: absolute;
+  top: 12.5rem;
+  left: 0.625rem;
+}
+.mny-turn-page__demo .image-bg[data-v-57280228] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -9999;
+  /* display: none; */
+}
+.mny-turn-page__demo .tp-images[data-v-57280228] {
+  position: absolute;
+  left: 3.75rem;
+  top: 1.25rem;
+}
