@@ -2,13 +2,13 @@
  * @Description: 翻页动画效果组件
  * @Autor: <maonianyou@foxmail.com>
  * @Date: 2022-09-30 01:06:18
- * @LastEditors: Archmage | 大法师 <maonianyou@foxmail.com>
+ * @LastEditors: Archmage | 大法师 <maonianyou@pay.media>
 -->
 <template>
   <view class="uni-turn-page">
     <view
       v-for="(item, i) in resource"
-      :key="item.img"
+      :key="i"
       :style="{ zIndex: state.zIndex[i] }"
       :animation="state.animation[i]"
       @touchstart="onTouchStart"
@@ -214,7 +214,7 @@ const onTouchEnd = async (e) => {
 
 <style lang="scss" scoped>
 .uni-turn-page {
-  transform: skewX(-5deg);
+  transform: skew(-5deg, 2deg);
   .image-container {
     position: absolute;
     top: 0;

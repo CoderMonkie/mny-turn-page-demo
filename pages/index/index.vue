@@ -1,4 +1,3 @@
-
 <template>
   <view class="mny-turn-page__demo">
     <view class="text-xl uni-pa-6">
@@ -8,13 +7,13 @@
     <view class="image-container">
       <image
         lazy-load="true"
-        @error="onImageError(item)"
+        @error="onImageError"
         src="/static/calendar.png"
         class="image-bg"
         style="width: 700rpx; height: 400rpx; background-color: #eeeeee"
       />
       <mny-turn-page
-        :width="440"
+        :width="450"
         :height="220"
         :resource="state.list"
         :recyle="true"
@@ -48,6 +47,10 @@ const state = reactive({
     },
   ],
 });
+
+const onImageError = (e) => {
+  console.log(e);
+};
 </script>
 
 <style lang="scss" scoped>
@@ -67,7 +70,7 @@ const state = reactive({
   }
   .tp-images {
     position: absolute;
-    left: 120rpx;
+    left: 100rpx;
     top: 40rpx;
   }
 }
