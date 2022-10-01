@@ -9,7 +9,9 @@
     <view
       v-for="(item, i) in resource"
       :key="i"
-      :style="{ zIndex: state.zIndex[i] }"
+      :style="{
+        zIndex: state.zIndex[i],
+      }"
       :animation="state.animation[i]"
       @touchstart="onTouchStart"
       @touchend="onTouchEnd"
@@ -105,8 +107,10 @@ const animation = uni.createAnimation({
   timingFunction: "ease",
   transformOrigin: "0 0 0",
 });
+const hide = animation.opacity(0).step({ duration: 1 }).export();
 state.zIndex = props.resource.map((n, i) => i * -1);
-state.animation = new Array(state.total).fill(null);
+state.animation = new Array(state.total).fill(hide);
+state.animation[0] = null;
 
 const onImageError = (e) => {
   console.error(e);
@@ -138,6 +142,7 @@ const generateCursor = (i, d, max) => {
    * 1 -1 = 0
    * 2 -1 = 1
    */
+  if (!props.recyle) return c;
   if (c === max) return 0;
   if (c < 0) return max - 1;
   return c;
@@ -164,52 +169,80 @@ const onTouchEnd = async (e) => {
   state.endY = e.changedTouches[0].clientY;
 
   if (state.turnNext) {
-    if (!validRange(state.total, state.currentIndex + 1)) return;
+    const newIndex = generateCursor(state.currentIndex, 1, state.total);
+    if (!validRange(state.total, newIndex)) return;
     console.log("turnNext");
+
+    // 因翻页后避免会翻时闪一下，就让翻过去的变透明了
+    // 如果翻完一圈，回到第一张，需要把它显示出来，
+    // 依此类推，每次翻下一页前，都应该提前准备好先让它显示出来
+    animation.opacity(1).step({ duration: 1 });
+    state.animation[newIndex] = animation.export();
+
     // 下一页
     state.turning = true;
     //
-    animation.rotateX(180).step();
+    animation.opacity(1).rotateX(180).step();
     animation.opacity(0.05).rotateX(270).step();
     state.animation[state.currentIndex] = animation.export();
 
     // 动画结束后
     setTimeout(async () => {
       changeLayer(state.currentIndex, state.total * -1);
-      animation.opacity(1).rotateX(0).step({ duration: 1 });
+      animation.opacity(0).rotateX(0).step({ duration: 1 });
       state.animation[state.currentIndex] = animation.export();
       await nextTick();
-      state.animation[state.currentIndex] = null;
+      // 因为隐藏掉已经翻过去的页，透明了，不能清除样式，否则上一页时回闪一下
+      // state.animation[state.currentIndex] = null;
       console.log("state.zIndex", state.zIndex, state.animation);
 
       // 记录新的当前页index
-      const newIndex = generateCursor(state.currentIndex, 1, state.total);
       state.currentIndex = newIndex;
       console.log("记录新的当前页index", state.currentIndex);
+      // 结束本次翻页
       state.turning = false;
     }, state.cDuration * 2);
   } else if (state.turnPrev) {
-    if (!validRange(state.total, state.currentIndex - 1)) return;
+    const newIndex = generateCursor(state.currentIndex, -1, state.total);
+    if (!validRange(state.total, newIndex)) return;
     console.log("turnPrev");
+
+    // 为淡入效果设置初始位置
+    animation.rotateX(-90).opacity(0.05).step({
+      /** 注：这里duration不能是0，否则第二条动画不能执行 */ duration: 1,
+    });
+    state.animation[newIndex] = animation.export();
+
     // 上一页
     state.turning = true;
     //
-    const newIndex = generateCursor(state.currentIndex, -1, state.total);
+    // 第一段动画：半透明出现在后上方，此时，当前页未切换
+    animation.opacity(0.2).rotateX(-180).step({ duration: state.cDuration });
+    // animation.rotateX(-180).step({ duration: state.cDuration });
+    state.animation[newIndex] = animation.export();
+    await nextTick();
+
     // 记录新的当前页index
     state.currentIndex = newIndex;
     console.log("记录新的当前页index", state.currentIndex);
-    animation.rotateX(270).opacity(0.1).step({
-      /** 注：这里duration不能是0，否则第二条动画不能执行 */ duration: 1,
-    });
-    animation.opacity(1).rotateX(180).step({ duration: state.cDuration });
-    animation.rotateX(180).step({ duration: state.cDuration });
-    animation.opacity(1).rotateX(-5).step({ duration: state.cDuration });
-    state.animation[state.currentIndex] = animation.export();
-
+    // 切换当前页
     changeLayer(state.currentIndex, state.total);
 
+    // 切换当前页后进行二段动画：恢复正常位置，覆盖掉原当前页
     setTimeout(() => {
-      state.animation[state.currentIndex] = null;
+      animation.opacity(1).rotateX(-360).step({ duration: state.cDuration });
+      animation.rotateX(0).step({ duration: 1 }); // 恢复
+      state.animation[newIndex] = animation.export();
+    }, state.cDuration);
+
+    setTimeout(() => {
+      // 上一页翻完后把上上页修改为透明
+      const newPrevIndex = generateCursor(state.currentIndex, -1, state.total);
+      state.animation[newPrevIndex] = animation
+        .opacity(0)
+        .step({ duration: 1 })
+        .export();
+      // 结束本次翻页
       state.turning = false;
     }, state.cDuration * 2);
   }
