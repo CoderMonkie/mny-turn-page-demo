@@ -13,6 +13,8 @@
       :animation="state.animation[i]"
       @touchstart="onTouchStart"
       @touchend="onTouchEnd"
+      @mousedown="onTouchStart"
+      @mouseup="onTouchEnd"
       class="image-container"
     >
       <slot :item="item">
@@ -152,12 +154,12 @@ watch(
 );
 
 const onTouchStart = (e) => {
-  // console.log("onTouchStart", e);
+  console.log("onTouchStart", e);
   state.startY = e.changedTouches[0].clientY;
 };
 
 const onTouchEnd = async (e) => {
-  // console.log("onTouchEnd", e);
+  console.log("onTouchEnd", e);
   if (state.turning) return;
   state.endY = e.changedTouches[0].clientY;
 
@@ -167,7 +169,6 @@ const onTouchEnd = async (e) => {
     // 下一页
     state.turning = true;
     //
-    animation.rotateY(-5).step({ duration: 1 });
     animation.rotateX(180).step();
     animation.opacity(0.05).rotateX(270).step();
     state.animation[state.currentIndex] = animation.export();
@@ -175,7 +176,7 @@ const onTouchEnd = async (e) => {
     // 动画结束后
     setTimeout(async () => {
       changeLayer(state.currentIndex, state.total * -1);
-      animation.opacity(1).rotateY(0).rotateX(0).step({ duration: 1 });
+      animation.opacity(1).rotateX(0).step({ duration: 1 });
       state.animation[state.currentIndex] = animation.export();
       await nextTick();
       state.animation[state.currentIndex] = null;
@@ -197,20 +198,12 @@ const onTouchEnd = async (e) => {
     // 记录新的当前页index
     state.currentIndex = newIndex;
     console.log("记录新的当前页index", state.currentIndex);
-    animation.rotateX(270).rotateY(0).opacity(0.1).step({
+    animation.rotateX(270).opacity(0.1).step({
       /** 注：这里duration不能是0，否则第二条动画不能执行 */ duration: 1,
     });
-    animation
-      .opacity(1)
-      .rotateX(180)
-      .rotateY(-5)
-      .step({ duration: state.cDuration });
+    animation.opacity(1).rotateX(180).step({ duration: state.cDuration });
     animation.rotateX(180).step({ duration: state.cDuration });
-    animation
-      .opacity(1)
-      .rotateX(-5)
-      .rotateY(0)
-      .step({ duration: state.cDuration });
+    animation.opacity(1).rotateX(-5).step({ duration: state.cDuration });
     state.animation[state.currentIndex] = animation.export();
 
     changeLayer(state.currentIndex, state.total);
