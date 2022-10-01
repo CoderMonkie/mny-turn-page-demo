@@ -37,7 +37,7 @@
 
 Demo
 
-![demo](./static/image/221001095323.gif "demo")
+![demo](https://github.com/CoderMonkie/mny-turn-page-demo/raw/main/uni_modules/mny-turn-page/static/image/capture.gif "demo")
 
 ```vue
 <template>

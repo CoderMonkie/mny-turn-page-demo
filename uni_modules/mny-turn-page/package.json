@@ -1,7 +1,7 @@
 {
   "id": "mny-turn-page",
   "displayName": "3D翻页效果组件",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "3D效果的图片翻页组件，上下滑动实现前后立体翻页",
   "keywords": [
     "3d,翻页,vue3"
