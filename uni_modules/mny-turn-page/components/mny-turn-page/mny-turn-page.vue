@@ -7,6 +7,7 @@
 <template>
   <view class="uni-turn-page">
     <view
+      :ref="collectRefs"
       v-for="(item, i) in resource"
       :key="i"
       :style="{
@@ -15,8 +16,6 @@
       :animation="state.animation[i]"
       @touchstart="onTouchStart"
       @touchend="onTouchEnd"
-      @mousedown="onTouchStart"
-      @mouseup="onTouchEnd"
       class="image-container"
     >
       <slot :item="item">
@@ -34,6 +33,7 @@
 
 <script setup>
 import { reactive, computed, nextTick, watch } from "vue";
+import { isPC } from "./utils.js";
 
 /** 默认动画时长 */
 const ANIMATION_DURATION = 800;
@@ -101,6 +101,7 @@ const state = reactive({
   cDuration: computed(() => props.duration || ANIMATION_DURATION),
 });
 
+state.zIndex = props.resource.map((n, i) => i * -1);
 const animation = uni.createAnimation({
   delay: 0,
   duration: state.cDuration,
@@ -108,7 +109,6 @@ const animation = uni.createAnimation({
   transformOrigin: "0 0 0",
 });
 const hide = animation.opacity(0).step({ duration: 1 }).export();
-state.zIndex = props.resource.map((n, i) => i * -1);
 state.animation = new Array(state.total).fill(hide);
 state.animation[0] = null;
 
@@ -158,6 +158,27 @@ watch(
   }
 );
 
+const collectRefs = (vNode) => {
+  if (!vNode || !isPC()) return;
+  // console.log("collectRefs", vNode.$el);
+  const el = vNode.$el;
+  if (!el) return;
+
+  function wrap(cb) {
+    return function (e) {
+      const { clientX, clientY } = e;
+      const wrapper = {
+        touches: [{ clientX, clientY }],
+        changedTouches: [{ clientX, clientY }],
+      };
+      cb(wrapper);
+    };
+  }
+
+  el.addEventListener("mousedown", wrap(onTouchStart));
+  el.addEventListener("mouseup", wrap(onTouchEnd));
+};
+
 const onTouchStart = (e) => {
   console.log("onTouchStart", e);
   state.startY = e.changedTouches[0].clientY;
@@ -192,13 +213,11 @@ const onTouchEnd = async (e) => {
       animation.opacity(0).rotateX(0).step({ duration: 1 });
       state.animation[state.currentIndex] = animation.export();
       await nextTick();
-      // 因为隐藏掉已经翻过去的页，透明了，不能清除样式，否则上一页时回闪一下
-      // state.animation[state.currentIndex] = null;
-      console.log("state.zIndex", state.zIndex, state.animation);
 
       // 记录新的当前页index
       state.currentIndex = newIndex;
       console.log("记录新的当前页index", state.currentIndex);
+      console.log("state.zIndex", state.zIndex, state.animation);
       // 结束本次翻页
       state.turning = false;
     }, state.cDuration * 2);
@@ -208,7 +227,7 @@ const onTouchEnd = async (e) => {
     console.log("turnPrev");
 
     // 为淡入效果设置初始位置
-    animation.rotateX(-90).opacity(0.05).step({
+    animation.rotateX(270).opacity(0.05).step({
       /** 注：这里duration不能是0，否则第二条动画不能执行 */ duration: 1,
     });
     state.animation[newIndex] = animation.export();
@@ -217,7 +236,7 @@ const onTouchEnd = async (e) => {
     state.turning = true;
     //
     // 第一段动画：半透明出现在后上方，此时，当前页未切换
-    animation.opacity(0.2).rotateX(-180).step({ duration: state.cDuration });
+    animation.opacity(0.2).rotateX(180).step({ duration: state.cDuration });
     // animation.rotateX(-180).step({ duration: state.cDuration });
     state.animation[newIndex] = animation.export();
     await nextTick();
@@ -230,8 +249,8 @@ const onTouchEnd = async (e) => {
 
     // 切换当前页后进行二段动画：恢复正常位置，覆盖掉原当前页
     setTimeout(() => {
-      animation.opacity(1).rotateX(-360).step({ duration: state.cDuration });
-      animation.rotateX(0).step({ duration: 1 }); // 恢复
+      animation.opacity(1).rotateX(0).step({ duration: state.cDuration });
+      // animation.rotateX(0).step({ duration: 1 }); // 恢复
       state.animation[newIndex] = animation.export();
     }, state.cDuration);
 
@@ -242,6 +261,7 @@ const onTouchEnd = async (e) => {
         .opacity(0)
         .step({ duration: 1 })
         .export();
+      console.log("state.zIndex", state.zIndex, state.animation);
       // 结束本次翻页
       state.turning = false;
     }, state.cDuration * 2);
