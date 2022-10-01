@@ -19,6 +19,15 @@
         @change="onChange"
       ></mny-turn-page>
     </view>
+    <!--  -->
+    <uni-link
+      href="https://ext.dcloud.net.cn/plugin?id=9668"
+      text="uni-app插件市场：3D翻页效果组件"
+      showUnderLine="false"
+      color="#007BFF"
+      class="uni-px-6"
+    >
+    </uni-link>
     <view class="author uni-info uni-px-6">
       <text>maonianyou@foxmail.com</text>
     </view>
