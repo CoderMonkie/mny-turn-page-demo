@@ -4,6 +4,8 @@
 
 ## API
 
+### Properties
+
 |Field|Type|Required|Default|Remark|
 |--|--|--|--|--|
 |width|Number/String|yes|-|需要设宽度，Number时默认使用rpx单位|
@@ -12,6 +14,12 @@
 |srcKey|String|-|"src"|图片地址的属性名|
 |recyle|Boolean|-|false|是否可循环翻页|
 |duration|String|-|-|单次动画的时长，单位毫秒|
+
+### Events
+
+|Event|Paramers|Remark|
+|--|--|--|
+|change|(item:Object, index:Number)|接收两个参数，当前项和下标|
 
 ## Usage
 

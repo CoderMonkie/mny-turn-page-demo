@@ -1,26 +1,26 @@
 <template>
   <view class="mny-turn-page__demo">
-    <view class="text-xl uni-pa-6">
-      <label for="">示例图片来源：</label>
-      <uni-link href="https://pixabay.com/">https://pixabay.com/</uni-link>
-    </view>
+    <view class="text-xl uni-pa-6"> 台历 2022 </view>
     <view class="image-container">
-      <image
+      <!-- <image
         lazy-load="true"
         @error="onImageError"
-        src="/static/calendar.png"
+        src="/static/calendar_bg.png"
         class="image-bg"
-        style="width: 700rpx; height: 400rpx; background-color: #eeeeee"
-      />
+        style="width: 750rpx; height: 420rpx"
+      /> -->
       <mny-turn-page
-        :width="450"
-        :height="220"
+        :width="660"
+        :height="640"
         :resource="state.list"
         :recyle="true"
         :duration="400"
-        src-key="img"
         class="tp-images"
+        @change="onChange"
       ></mny-turn-page>
+    </view>
+    <view class="author uni-info uni-px-6">
+      <text>maonianyou@foxmail.com</text>
     </view>
   </view>
 </template>
@@ -29,28 +29,27 @@
 import { reactive } from "vue";
 
 const state = reactive({
-  list: [
-    {
-      img: "https://cdn.pixabay.com/photo/2022/05/21/09/30/cat-7211080_960_720.jpg",
-    },
-    {
-      img: "https://cdn.pixabay.com/photo/2014/04/13/20/49/cat-323262_960_720.jpg",
-    },
-    {
-      img: "https://cdn.pixabay.com/photo/2015/04/23/21/59/tree-736877_960_720.jpg",
-    },
-    {
-      img: "https://cdn.pixabay.com/photo/2022/01/24/21/22/snail-6964793_960_720.jpg",
-    },
-    {
-      img: "https://cdn.pixabay.com/photo/2019/06/16/11/02/turtle-4277518_960_720.jpg",
-    },
-  ],
+  list: [],
 });
+
+const makeCalendar = () => {
+  const list = [];
+  for (let i = 0; i < 13; i++) {
+    const name = i.toString().padStart(2, "0");
+    list.push({ src: `/static/images/calendar_2022/${name}.jpg` });
+  }
+  state.list = list;
+};
 
 const onImageError = (e) => {
   console.log(e);
 };
+
+const onChange = (item, i) => {
+  console.log("onChange - turn to page:", i, item);
+};
+
+makeCalendar();
 </script>
 
 <style lang="scss" scoped>
@@ -58,7 +57,8 @@ const onImageError = (e) => {
   .image-container {
     position: absolute;
     top: 400rpx;
-    left: 20rpx;
+    left: 50rpx;
+    transform: skew(-5deg, 2deg);
   }
 
   .image-bg {
@@ -70,7 +70,7 @@ const onImageError = (e) => {
   }
   .tp-images {
     position: absolute;
-    left: 100rpx;
+    left: 20rpx;
     top: 40rpx;
   }
 }

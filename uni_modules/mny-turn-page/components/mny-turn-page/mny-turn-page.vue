@@ -29,11 +29,12 @@
 </template>
 
 <script setup>
-import { reactive, computed, nextTick } from "vue";
+import { reactive, computed, nextTick, watch } from "vue";
 
 /** 默认动画时长 */
 const ANIMATION_DURATION = 800;
 
+const emit = defineEmits(["change"]);
 const props = defineProps({
   /** 宽 */
   width: {
@@ -140,6 +141,16 @@ const generateCursor = (i, d, max) => {
   return c;
 };
 
+watch(
+  () => state.turning,
+  (value) => {
+    if (!value) {
+      // on finish animation
+      emit("change", props.resource[state.currentIndex], state.currentIndex);
+    }
+  }
+);
+
 const onTouchStart = (e) => {
   // console.log("onTouchStart", e);
   state.startY = e.changedTouches[0].clientY;
@@ -214,7 +225,7 @@ const onTouchEnd = async (e) => {
 
 <style lang="scss" scoped>
 .uni-turn-page {
-  transform: skew(-5deg, 2deg);
+  // transform: skew(-5deg, 2deg);
   .image-container {
     position: absolute;
     top: 0;
